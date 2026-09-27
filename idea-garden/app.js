@@ -7,17 +7,6 @@ const stages=[
   {id:'done',label:'已實現',icon:'🌳'}
 ];
 const categories=['尚未分類','格致青年','教學與課程','STEM／科技','校務與行政','網站與系統','視覺設計','閱讀與生活'];
-const suggestionBank={
-  '尚未分類':['用一句話寫下這個想法想改變什麼','補充這個想法出現的時間與來源','替這個想法選一個最接近的分類','寫下如果不做，最可惜的地方','找出和這個想法有關的另一張靈感'],
-  '格致青年':['替這個構想寫出三個欄位名稱','列出三位可能的採訪或邀稿對象','用50字寫出這篇內容的核心','畫出一張簡單的版面草圖','找出適合放進下期刊物的切入點'],
-  '教學與課程':['寫下學生最後要學會的一件事','將活動切成10分鐘、20分鐘、50分鐘版本','列出需要準備的教材與器材','設計一個學生可以立即操作的任務','想出一個能看見學習成果的方法'],
-  'STEM／科技':['先測試最關鍵的一項技術','畫出輸入、處理、輸出的流程','列出目前已經擁有的器材','設計一個10分鐘可完成的小實驗','記錄測試成功與失敗的條件'],
-  '校務與行政':['寫下這個構想想改善的問題','找出第一位需要確認的人','列出執行前需要的三項資料','寫一份50字的簡短說明','決定最晚需要完成的時間'],
-  '網站與系統':['寫出使用者最需要完成的一件事','畫出首頁最重要的操作流程','列出第一版一定要有的三項功能','找出目前最影響使用的問題','建立一筆實際資料進行測試'],
-  '視覺設計':['蒐集三張符合方向的參考圖','決定主要色彩與一種輔助色','寫下畫面最需要被看見的文字','畫三張不同構圖的小草稿','刪除一個不必要的視覺元素'],
-  '閱讀與生活':['寫下最觸動自己的一個觀點','記錄這個想法是由什麼引發的','找出一本可以延伸閱讀的書','寫下想與哪一個人分享','將想法轉成一個本週可做的行動']
-};
-const stageSuggestions={seed:['補上三個能代表這個想法的關鍵詞','用一句話寫出為什麼值得做'],growing:['找一個可以參考的案例','比較兩種可能的發展方向'],ready:['把第一步拆成10分鐘能完成的任務','確認開始前還缺少哪一項資源'],doing:['寫下目前最大的阻礙','完成一個今天可以看見的成果'],done:['寫下這次最值得保留的做法','從成果延伸出一顆新的靈感']};
 const demoIdeas=[
   {title:'《格致青年》閱讀專欄改版',content:'從公視「名人書房」得到靈感：每月邀請老師推薦一本書，也讓任課老師分享學科中的新發現。',category:'格致青年',stage:'growing',action:'先寫出三個固定欄位名稱'},
   {title:'校內教師讀書會',content:'從閱讀推薦延伸成可以交流、分享，也能回到教學現場的讀書會。',category:'閱讀與生活',stage:'seed',action:'先記下希望邀請的三位老師'},
@@ -51,20 +40,15 @@ function renderProgress(){
   document.querySelector('#timeline').innerHTML=state.activity.slice().reverse().map(a=>`<article class="timeline-item"><time>${dateLabel(a.date)}</time><strong>${esc(a.title)}</strong><p>${esc(a.text)}</p></article>`).join('')||'<div class="empty-state">完成第一個小行動後，成長軌跡會留在這裡。</div>';
 }
 function switchView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`${id}View`));document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));scrollTo({top:0,behavior:'smooth'})}
-function openIdea(id){const x=state.ideas.find(i=>i.id===id);if(!x)return;editingId=id;document.querySelector('#editTitle').value=x.title;document.querySelector('#editContent').value=x.content;document.querySelector('#editCategory').value=x.category;document.querySelector('#editStage').value=x.stage;document.querySelector('#editAction').value=x.action||'';document.querySelector('#dialogStageIcon').textContent=stageOf(x.stage).icon;document.querySelector('#suggestions').hidden=true;document.querySelector('#ideaDialog').showModal()}
-function shuffle(list){return list.slice().sort(()=>Math.random()-.5)}
-function makeSuggestions(){const category=document.querySelector('#editCategory').value;const stage=document.querySelector('#editStage').value;const pool=[...(suggestionBank[category]||suggestionBank['尚未分類']),...(stageSuggestions[stage]||[])];return shuffle([...new Set(pool)]).slice(0,3)}
-function showSuggestions(){document.querySelector('#suggestionList').innerHTML=makeSuggestions().map(x=>`<button type="button" class="suggestion-option" data-suggestion="${esc(x)}">${esc(x)}</button>`).join('');document.querySelector('#suggestions').hidden=false}
+function openIdea(id){const x=state.ideas.find(i=>i.id===id);if(!x)return;editingId=id;document.querySelector('#editTitle').value=x.title;document.querySelector('#editContent').value=x.content;document.querySelector('#editCategory').value=x.category;document.querySelector('#editStage').value=x.stage;document.querySelector('#editAction').value=x.action||'';document.querySelector('#dialogStageIcon').textContent=stageOf(x.stage).icon;document.querySelector('#ideaDialog').showModal()}
 
 document.querySelector('#todayLabel').textContent=new Intl.DateTimeFormat('zh-TW',{month:'long',day:'numeric',weekday:'long'}).format(new Date());
 document.querySelector('#editCategory').innerHTML=categories.map(x=>`<option>${x}</option>`).join('');
 document.querySelector('#editStage').innerHTML=stages.map(x=>`<option value="${x.id}">${x.icon} ${x.label}</option>`).join('');
-document.addEventListener('click',e=>{const view=e.target.closest('[data-view]');if(view)switchView(view.dataset.view);const edit=e.target.closest('[data-edit]');if(edit)openIdea(edit.dataset.edit);const filter=e.target.closest('[data-filter]');if(filter){currentFilter=filter.dataset.filter;renderFilters();renderGarden()}const suggestion=e.target.closest('[data-suggestion]');if(suggestion){document.querySelector('#editAction').value=suggestion.dataset.suggestion;document.querySelector('#suggestions').hidden=true;showToast('已放入下一個小行動')}const win=e.target.closest('[data-win]');if(win){const x=state.ideas.find(i=>i.id===win.dataset.win);if(x){state.activity.push({date:new Date().toISOString(),title:x.title,text:`完成：${x.action}`});x.wins.push(new Date().toISOString());x.updatedAt=new Date().toISOString();save();showToast('記下了一個小勝利 ✦')}}});
+document.addEventListener('click',e=>{const view=e.target.closest('[data-view]');if(view)switchView(view.dataset.view);const edit=e.target.closest('[data-edit]');if(edit)openIdea(edit.dataset.edit);const filter=e.target.closest('[data-filter]');if(filter){currentFilter=filter.dataset.filter;renderFilters();renderGarden()}const win=e.target.closest('[data-win]');if(win){const x=state.ideas.find(i=>i.id===win.dataset.win);if(x){state.activity.push({date:new Date().toISOString(),title:x.title,text:`完成：${x.action}`});x.wins.push(new Date().toISOString());x.updatedAt=new Date().toISOString();save();showToast('記下了一個小勝利 ✦')}}});
 document.querySelector('#ideaForm').addEventListener('submit',e=>{e.preventDefault();const text=document.querySelector('#ideaInput').value.trim();if(!text)return;state.ideas.unshift({id:crypto.randomUUID?.()||String(Date.now()),title:smartTitle(text),content:text,category:document.querySelector('#categoryInput').value,stage:'seed',action:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),wins:[]});e.target.reset();save();showToast('靈感已種下 🌱')});
 document.querySelector('#editForm').addEventListener('submit',e=>{if(e.submitter?.value!=='save')return;const x=state.ideas.find(i=>i.id===editingId);if(!x)return;x.title=document.querySelector('#editTitle').value.trim();x.content=document.querySelector('#editContent').value.trim();x.category=document.querySelector('#editCategory').value;x.stage=document.querySelector('#editStage').value;x.action=document.querySelector('#editAction').value.trim();x.updatedAt=new Date().toISOString();save();showToast('已儲存變更')});
 document.querySelector('#deleteBtn').addEventListener('click',()=>{if(!editingId||!confirm('確定要刪除這顆靈感種子嗎？'))return;state.ideas=state.ideas.filter(i=>i.id!==editingId);document.querySelector('#ideaDialog').close();save();showToast('已刪除')});
-document.querySelector('#suggestBtn').addEventListener('click',showSuggestions);
-document.querySelector('#refreshSuggestions').addEventListener('click',showSuggestions);
 document.querySelector('#exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`靈感種子備份_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);showToast('備份檔已下載')});
 
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;

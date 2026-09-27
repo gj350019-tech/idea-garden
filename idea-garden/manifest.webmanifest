@@ -1,0 +1,10 @@
+{
+  "name":"靈感種子 Idea Garden",
+  "short_name":"靈感種子",
+  "description":"把一閃而過的靈感，養成真正的行動。",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f6f4e9",
+  "theme_color":"#18392f",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
