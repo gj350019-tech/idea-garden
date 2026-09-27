@@ -6,6 +6,13 @@ const stages=[
   {id:'doing',label:'執行中',icon:'🚀'},
   {id:'done',label:'已實現',icon:'🌳'}
 ];
+const plantImages=[
+  'assets/plant-seed.png',
+  'assets/plant-sprout.png',
+  'assets/plant-leaf.png',
+  'assets/plant-bud.png',
+  'assets/plant-bloom.png'
+];
 const categories=['尚未分類','格致青年','教學與課程','STEM／科技','校務與行政','網站與系統','視覺設計','閱讀與生活'];
 const suggestionBank={
   '尚未分類':['用一句話寫下這個想法想改變什麼','補充這個想法出現的時間與來源','替這個想法選一個最接近的分類','寫下如果不做，最可惜的地方','找出和這個想法有關的另一張靈感'],
@@ -47,7 +54,7 @@ function renderToday(){
   document.querySelector('#todayCard').innerHTML=x?`<article class="step-card"><button class="step-check" data-win="${x.id}" aria-label="完成這一步">✓</button><div class="step-copy"><small>${esc(x.title)}</small><strong>${esc(x.action)}</strong><p>先花 10 分鐘就好${count?` · 已前進 ${count} 步`:''}</p></div><button class="text-button" data-edit="${x.id}">編輯</button></article>`:'<div class="empty-state">今天的小步驟都完成了。替一顆種子設定新的下一步，明天繼續靠近夢想。</div>';
 }
 function renderFilters(){const items=[{id:'all',label:'全部'},...stages];document.querySelector('#stageFilters').innerHTML=items.map(x=>`<button class="filter-chip ${currentFilter===x.id?'active':''}" data-filter="${x.id}">${x.icon||''} ${x.label}</button>`).join('')}
-function renderGarden(){const list=state.ideas.filter(x=>currentFilter==='all'||x.stage===currentFilter);const positions=['2%','21%','42.5%','65.7%','89.4%'];document.querySelector('#gardenGrid').innerHTML=list.map(x=>{const s=stageOf(x.stage);const level=Math.max(0,stages.findIndex(v=>v.id===x.stage));const steps=state.activity.filter(a=>a.ideaId===x.id&&a.type==='win').length;return `<button class="botanical-plant" data-edit="${x.id}" aria-label="${esc(x.title)}，${s.label}，已前進${steps}步"><span class="plant-sprite" style="--pos:${positions[level]}" aria-hidden="true"></span><span class="specimen-label"><strong>${esc(x.title)}</strong><small>${esc(x.category)} · ${s.label}${steps?` · ${steps}步`:''}</small></span></button>`}).join('')||'<div class="empty-state">這片花圃還是空的，等待下一顆靈感種子。</div>'}
+function renderGarden(){const list=state.ideas.filter(x=>currentFilter==='all'||x.stage===currentFilter);document.querySelector('#gardenGrid').innerHTML=list.map(x=>{const s=stageOf(x.stage);const level=Math.max(0,stages.findIndex(v=>v.id===x.stage));const steps=state.activity.filter(a=>a.ideaId===x.id&&a.type==='win').length;return `<button class="botanical-plant" data-edit="${x.id}" aria-label="${esc(x.title)}，${s.label}，已前進${steps}步"><span class="plant-sprite" aria-hidden="true"><img src="${plantImages[level]}" alt="" loading="lazy"></span><span class="specimen-label"><strong>${esc(x.title)}</strong><small>${esc(x.category)} · ${s.label}${steps?` · ${steps}步`:''}</small></span></button>`}).join('')||'<div class="empty-state">這片花圃還是空的，等待下一顆靈感種子。</div>'}
 function renderProgress(){
   const records=state.activity.length,done=state.ideas.filter(x=>x.stage==='done').length,active=state.ideas.filter(x=>['ready','doing'].includes(x.stage)).length;
   document.querySelector('#statsGrid').innerHTML=`<div class="stat-card"><strong>${records}</strong><span>筆成長紀錄</span></div><div class="stat-card"><strong>${active}</strong><span>準備／執行中</span></div><div class="stat-card"><strong>${done}</strong><span>個想法已實現</span></div>`;
