@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18392f">
+  <meta name="description" content="把一閃而過的靈感，養成真正的行動。">
+  <title>靈感種子</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand" data-view="capture" aria-label="回到快速記錄">
+        <span class="brand-mark">芽</span>
+        <span><strong>靈感種子</strong><small>Idea Garden</small></span>
+      </button>
+      <button class="icon-button" id="exportBtn" aria-label="備份資料" title="備份資料">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 15v4h14v-4"/></svg>
+      </button>
+    </header>
+
+    <main>
+      <section class="view active" id="captureView">
+        <div class="welcome-row">
+          <div>
+            <p class="eyebrow" id="todayLabel"></p>
+            <h1>現在想到什麼？</h1>
+          </div>
+          <div class="seed-count"><span id="totalCount">0</span><small>顆種子</small></div>
+        </div>
+
+        <form class="capture-card" id="ideaForm">
+          <textarea id="ideaInput" rows="5" maxlength="1200" placeholder="不用整理，先把腦中的話留下來……" required></textarea>
+          <div class="capture-tools">
+            <div class="input-actions">
+              <button type="button" class="round-button" id="voiceBtn" aria-label="語音輸入" title="語音輸入">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a4 4 0 0 0 4-4V7a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4Zm-7-4a7 7 0 0 0 14 0M12 18v3m-3 0h6"/></svg>
+              </button>
+              <select id="categoryInput" aria-label="選擇分類">
+                <option value="尚未分類">尚未分類</option>
+                <option>格致青年</option><option>教學與課程</option><option>STEM／科技</option>
+                <option>校務與行政</option><option>網站與系統</option><option>視覺設計</option><option>閱讀與生活</option>
+              </select>
+            </div>
+            <button class="primary-button" type="submit">種下想法 <span>→</span></button>
+          </div>
+          <p class="voice-status" id="voiceStatus" role="status"></p>
+        </form>
+
+        <section class="today-panel">
+          <div class="section-heading">
+            <div><p class="eyebrow">TODAY'S STEP</p><h2>今天推進一小步</h2></div>
+            <button class="text-button" data-view="garden">查看全部</button>
+          </div>
+          <div id="todayCard"></div>
+        </section>
+
+        <section class="recent-section">
+          <div class="section-heading"><h2>最近的靈感</h2></div>
+          <div class="idea-list" id="recentList"></div>
+        </section>
+      </section>
+
+      <section class="view" id="gardenView">
+        <div class="page-heading">
+          <p class="eyebrow">IDEA GARDEN</p><h1>靈感花園</h1>
+          <p>每個想法都有自己的生長速度。</p>
+        </div>
+        <div class="filters" id="stageFilters" aria-label="依階段篩選"></div>
+        <div class="idea-grid" id="gardenGrid"></div>
+      </section>
+
+      <section class="view" id="progressView">
+        <div class="page-heading">
+          <p class="eyebrow">SMALL WINS</p><h1>我的小勝利</h1>
+          <p>不是只有完成才算進步，每一步都算數。</p>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="timeline" id="timeline"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主要導覽">
+      <button class="active" data-view="capture"><span>＋</span><small>記下</small></button>
+      <button data-view="garden"><span>❋</span><small>花園</small></button>
+      <button data-view="progress"><span>↗</span><small>成長</small></button>
+    </nav>
+  </div>
+
+  <dialog id="ideaDialog">
+    <form method="dialog" class="dialog-card" id="editForm">
+      <div class="dialog-header"><span class="stage-icon" id="dialogStageIcon">🌱</span><button value="cancel" class="close-button" aria-label="關閉">×</button></div>
+      <label>靈感名稱<input id="editTitle" maxlength="80" required></label>
+      <label>內容<textarea id="editContent" rows="5" maxlength="1200"></textarea></label>
+      <div class="form-row">
+        <label>分類<select id="editCategory"></select></label>
+        <label>生長階段<select id="editStage"></select></label>
+      </div>
+      <label>下一個小行動<input id="editAction" maxlength="120" placeholder="例如：先寫出三個欄位名稱"></label>
+      <div class="dialog-actions">
+        <button type="button" class="danger-button" id="deleteBtn">刪除</button>
+        <button value="save" class="primary-button">儲存變更</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
