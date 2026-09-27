@@ -75,8 +75,8 @@
 
       <section class="view" id="progressView">
         <div class="page-heading">
-          <p class="eyebrow">SMALL WINS</p><h1>我的小勝利</h1>
-          <p>不是只有完成才算進步，每一步都算數。</p>
+          <p class="eyebrow">GROWTH JOURNAL</p><h1>我的成長紀錄</h1>
+          <p>每一次修改，都留下想法成長的根據。</p>
         </div>
         <div class="stats-grid" id="statsGrid"></div>
         <div class="timeline" id="timeline"></div>
@@ -93,6 +93,8 @@
   <dialog id="ideaDialog">
     <form method="dialog" class="dialog-card" id="editForm">
       <div class="dialog-header"><span class="stage-icon" id="dialogStageIcon">🌱</span><button value="cancel" class="close-button" aria-label="關閉">×</button></div>
+      <div class="detail-tabs" role="tablist"><button type="button" class="active" data-detail-tab="current">目前內容</button><button type="button" data-detail-tab="history">成長歷程 <span id="historyCount">0</span></button></div>
+      <div id="currentPanel" class="detail-panel active">
       <label>靈感名稱<input id="editTitle" maxlength="80" required></label>
       <label>內容<textarea id="editContent" rows="5" maxlength="1200"></textarea></label>
       <div class="form-row">
@@ -104,6 +106,11 @@
       <div class="dialog-actions">
         <button type="button" class="danger-button" id="deleteBtn">刪除</button>
         <button value="save" class="primary-button">儲存變更</button>
+      </div>
+      </div>
+      <div id="historyPanel" class="detail-panel">
+        <div class="add-note"><textarea id="noteInput" rows="2" maxlength="300" placeholder="補充今天的進度、發現或遇到的問題……"></textarea><button type="button" class="primary-button" id="addNoteBtn">＋ 補充紀錄</button></div>
+        <div class="idea-history" id="ideaHistory"></div>
       </div>
     </form>
   </dialog>
