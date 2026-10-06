@@ -41,6 +41,24 @@ function dateLabel(iso){return new Intl.DateTimeFormat('zh-TW',{month:'short',da
 function dateTimeLabel(iso){return new Intl.DateTimeFormat('zh-TW',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(iso))}
 function smartTitle(text){const first=text.split(/[。！!？?\n]/).find(Boolean)?.trim()||'新的想法';return first.length>28?first.slice(0,28)+'…':first}
 function showToast(msg){const el=document.querySelector('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>el.classList.remove('show'),2200)}
+function safeDate(value,fallback){const date=new Date(value);return Number.isNaN(date.getTime())?fallback:date.toISOString()}
+function normalizeBackup(raw){
+  if(!raw||typeof raw!=='object'||Array.isArray(raw)||!Array.isArray(raw.ideas))throw new Error('這不是「靈感種子」的備份檔。');
+  const now=new Date().toISOString(),usedIds=new Set();
+  const ideas=raw.ideas.map((item,index)=>{
+    if(!item||typeof item!=='object'||Array.isArray(item))throw new Error(`第 ${index+1} 筆靈感格式不完整。`);
+    const content=typeof item.content==='string'?item.content:'';
+    const suppliedTitle=typeof item.title==='string'?item.title.trim():'';
+    if(!suppliedTitle&&!content.trim())throw new Error(`第 ${index+1} 筆靈感沒有內容。`);
+    let id=typeof item.id==='string'&&item.id?item.id:uid();while(usedIds.has(id))id=uid();usedIds.add(id);
+    const createdAt=safeDate(item.createdAt,now);
+    return {id,title:suppliedTitle||smartTitle(content),content,category:categories.includes(item.category)?item.category:'尚未分類',stage:stages.some(s=>s.id===item.stage)?item.stage:'seed',action:typeof item.action==='string'?item.action:'',createdAt,updatedAt:safeDate(item.updatedAt,createdAt),wins:Array.isArray(item.wins)?item.wins.filter(x=>!Number.isNaN(new Date(x).getTime())):[]};
+  });
+  const ideaIds=new Set(ideas.map(x=>x.id)),ideaByTitle=new Map(ideas.map(x=>[x.title,x.id]));
+  const activity=(Array.isArray(raw.activity)?raw.activity:[]).filter(a=>a&&typeof a==='object'&&!Array.isArray(a)).map((a,index)=>({id:typeof a.id==='string'&&a.id?a.id:`import-${index}-${Date.now()}`,ideaId:ideaIds.has(a.ideaId)?a.ideaId:(ideaByTitle.get(a.title)||null),date:safeDate(a.date,now),title:typeof a.title==='string'?a.title:'匯入的成長紀錄',text:typeof a.text==='string'?a.text:'',type:typeof a.type==='string'?a.type:'win'}));
+  ideas.forEach(x=>{if(!activity.some(a=>a.ideaId===x.id&&a.type==='created'))activity.push({id:uid(),ideaId:x.id,date:x.createdAt,title:x.title,text:`最初想法：${x.content}`,type:'created'})});
+  return {ideas,activity};
+}
 
 function renderAll(){
   document.querySelector('#totalCount').textContent=state.ideas.length;
@@ -82,6 +100,9 @@ document.querySelector('#suggestBtn').addEventListener('click',showSuggestions);
 document.querySelector('#refreshSuggestions').addEventListener('click',showSuggestions);
 document.querySelector('#addNoteBtn').addEventListener('click',()=>{const input=document.querySelector('#noteInput');const text=input.value.trim();const x=state.ideas.find(i=>i.id===editingId);if(!text||!x)return;state.activity.push({id:uid(),ideaId:x.id,date:new Date().toISOString(),title:`${x.title}｜補充紀錄`,text,type:'note'});input.value='';save();renderIdeaHistory();showToast('已補充一筆成長紀錄')});
 document.querySelector('#exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`靈感種子備份_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);showToast('備份檔已下載')});
+const importFile=document.querySelector('#importFile');
+document.querySelector('#importBtn').addEventListener('click',()=>{importFile.value='';importFile.click()});
+importFile.addEventListener('change',async()=>{const file=importFile.files?.[0];if(!file)return;try{if(file.size>20*1024*1024)throw new Error('備份檔超過 20 MB，請確認是否選到正確檔案。');const next=normalizeBackup(JSON.parse(await file.text()));const ok=confirm(`找到 ${next.ideas.length} 顆靈感、${next.activity.length} 筆成長紀錄。\n\n載入後會取代這台電腦目前的資料；若電腦已有資料，建議先下載備份。\n\n確定要載入「${file.name}」嗎？`);if(!ok)return;state=next;currentFilter='all';editingId=null;localStorage.setItem(STORE_KEY,JSON.stringify(state));renderAll();switchView('capture');showToast(`已載入 ${state.ideas.length} 顆靈感 🌱`)}catch(error){alert(`無法載入備份：${error.message||'檔案格式不正確'}`)}finally{importFile.value=''}});
 
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SpeechRecognition){const rec=new SpeechRecognition();rec.lang='zh-TW';rec.interimResults=true;let base='';rec.onstart=()=>{base=document.querySelector('#ideaInput').value;document.querySelector('#voiceBtn').classList.add('listening');document.querySelector('#voiceStatus').textContent='正在聽，說完後會自動停止……'};rec.onresult=e=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;document.querySelector('#ideaInput').value=(base+' '+t).trim()};rec.onend=()=>{document.querySelector('#voiceBtn').classList.remove('listening');document.querySelector('#voiceStatus').textContent='語音已轉成文字'};document.querySelector('#voiceBtn').addEventListener('click',()=>rec.start())}else{document.querySelector('#voiceBtn').addEventListener('click',()=>showToast('此瀏覽器暫不支援語音輸入'))}

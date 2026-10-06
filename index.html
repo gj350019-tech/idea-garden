@@ -17,9 +17,15 @@
         <span class="brand-mark">芽</span>
         <span><strong>靈感種子</strong><small>Idea Garden</small></span>
       </button>
-      <button class="icon-button" id="exportBtn" aria-label="備份資料" title="備份資料">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 15v4h14v-4"/></svg>
-      </button>
+      <div class="topbar-actions">
+        <button class="icon-button" id="importBtn" aria-label="載入備份" title="載入備份">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 0-4 4m4-4 4 4M5 15v4h14v-4"/></svg>
+        </button>
+        <button class="icon-button" id="exportBtn" aria-label="下載備份" title="下載備份">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 15v4h14v-4"/></svg>
+        </button>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
     </header>
 
     <main>
